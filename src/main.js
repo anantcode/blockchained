@@ -1,12 +1,12 @@
 const SHA256 = require("crypto-js/sha256");
 
 class Block {
-    constructor(timestamp, data) {
-        this.index = 0;
-        this.timestamp = timestamp;
+    constructor(index, data, prevHash) {
+        this.index = index;
+        this.timestamp = Math.floor(Date.now() / 1000);
         this.data = data;
-        this.previousHash = 0;
-        this.hash = calculateHash();
+        this.previousHash = prevHash;
+        this.hash = this.calculateHash();
         this.nonce = 0;
     }
 
@@ -25,36 +25,57 @@ class Block {
 
 class Blockchain {
     constructor() {
-        this.chain = [this.createGenesis()];
+        this.chain = [];
     }
 
     createGenesis() {
-        return new Block(0, "10/02/2021", "Genesis block", "0");
+        return new Block("10/02/2021", "Genesis block");
     }
 
     latestBlock() {
         return this.chain[this.chain.length - 1];
     }
 
-    addBlock(newBlock) {
-        newBlock.previousHash = this.latestBlock.hash;
-        newBlock.hash = newBlock.calculateHash();
-        this.chain.push(newBlock);
+    addBlock(data) {
+        let index = this.chain.length;
+        let prevHash =
+            this.chain.length !== 0
+                ? this.chain[this.chain.length - 1].hash
+                : 0;
+        let block = new Block(index, data, prevHash);
+        this.chain.push(block);
     }
 
-    checkValid() {
-        for (let i = 1; i < this.chain.length; i++) {
-            const currentBlock = chain[i];
-            const previousBlock = chain[i - 1];
+    chainIsValid() {
+        for (let i = 0; i < this.chain.length; i++) {
+            const currentBlock = this.chain[i];
+            const previousBlock = this.chain[i - 1];
 
             if (currentBlock.hash !== currentBlock.calculateHash()) {
                 return false;
             }
-            if (currentBlock.previousHash !== previousBlock.hash) {
+            if (i > 0 && currentBlock.previousHash !== previousBlock.hash) {
                 return false;
             }
         }
-
         return true;
     }
 }
+
+let BlockChain = new Blockchain();
+
+BlockChain.addBlock({
+    sender: "Bruce wayne",
+    reciver: "Tony stark",
+    amount: 100,
+});
+BlockChain.addBlock({
+    sender: "Harrison wells",
+    reciver: "Han solo",
+    amount: 50,
+});
+BlockChain.addBlock({ sender: "Tony stark", reciver: "Ned stark", amount: 75 });
+
+console.dir(BlockChain, { depth: null });
+
+console.log("Is blockchain valid? " + BlockChain.chainIsValid());
