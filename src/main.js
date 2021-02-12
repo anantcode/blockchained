@@ -6,11 +6,25 @@ class Block {
         this.timestamp = Math.floor(Date.now() / 1000);
         this.data = data;
         this.previousHash = prevHash;
-        this.hash = this.calculateHash();
         this.nonce = 0;
+        this.hash = this.calculateHash();
     }
 
     calculateHash() {
+        // console.log(
+        //     `Calculating hash for following data: ${this.index} ${this.previousHash} ${this.timestamp} ${this.data} ${this.nonce}`
+        // );
+
+        // console.log(
+        //     `Calculated hash:  ${SHA256(
+        //         this.index +
+        //             this.previousHash +
+        //             this.timestamp +
+        //             this.data +
+        //             this.nonce
+        //     ).toString()} \n`
+        // );
+
         return SHA256(
             this.index +
                 this.previousHash +
@@ -19,21 +33,11 @@ class Block {
                 this.nonce
         ).toString();
     }
-
-    mineBlock(difficulty) {}
 }
 
 class Blockchain {
     constructor() {
         this.chain = [];
-    }
-
-    createGenesis() {
-        return new Block("10/02/2021", "Genesis block");
-    }
-
-    latestBlock() {
-        return this.chain[this.chain.length - 1];
     }
 
     addBlock(data) {
@@ -48,13 +52,19 @@ class Blockchain {
 
     chainIsValid() {
         for (let i = 0; i < this.chain.length; i++) {
-            const currentBlock = this.chain[i];
-            const previousBlock = this.chain[i - 1];
+            let currentBlock = this.chain[i];
+
+            // console.log("i= " + i);
+            // console.log("1: " + currentBlock.hash);
+            // console.log("2: " + currentBlock.calculateHash());
+            // console.log("3: " + currentBlock.previousHash);
+            // if (i > 0) console.log("4: " + this.chain[i - 1].hash);
+            // console.log("\n");
 
             if (currentBlock.hash !== currentBlock.calculateHash()) {
                 return false;
             }
-            if (i > 0 && currentBlock.previousHash !== previousBlock.hash) {
+            if (i > 0 && currentBlock.previousHash !== this.chain[i - 1].hash) {
                 return false;
             }
         }
